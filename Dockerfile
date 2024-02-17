@@ -18,8 +18,8 @@ ENV PATH=${FOUNDRY_DIR}/bin/:${PATH}
 RUN curl -L https://foundry.paradigm.xyz | bash && \
     foundryup
 
-#COPY requirements.txt /tmp/requirements.txt
-#RUN pip install -r /tmp/requirements.txt
+COPY requirements.txt /tmp/requirements.txt
+RUN pip install -r /tmp/requirements.txt
 
 WORKDIR /home/ctf
 
