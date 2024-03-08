@@ -47,6 +47,14 @@ class Launcher(abc.ABC):
 
         self.mnemonic = generate_mnemonic(12, lang="english")
 
+        # fund player account from dev account
+        web3 = get_web3()
+        web3.eth.send_transaction({
+                "from": web3.eth.accounts[0],
+                "to": get_player_account(self.mnemonic).address,
+                "value": web3.to_wei(1, "ether"),
+                })
+
         for i, action in enumerate(self._actions):
             print(f"{i+1} - {action.name}")
 

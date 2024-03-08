@@ -8,7 +8,7 @@ from ctf_launchers.team_provider import TeamProvider, get_team_provider
 from ctf_launchers.types import UserData
 from ctf_launchers.utils import deploy, get_web3
 
-FLAG = os.getenv("FLAG", "rwctf{flag}")
+FLAG = os.getenv("FLAG", "EPFL{flag}")
 
 
 class PwnChallengeLauncher(Launcher):

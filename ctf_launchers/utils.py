@@ -14,8 +14,6 @@ def deploy(
     deploy_script: str = "script/Deploy.s.sol:Deploy",
     env: Dict = {},
 ) -> str:
-    anvil_autoImpersonateAccount(web3, True)
-
     rfd, wfd = os.pipe2(os.O_NONBLOCK)
 
     proc = subprocess.Popen(
@@ -31,7 +29,7 @@ def deploy(
             "--broadcast",
             "--unlocked",
             "--sender",
-            "0x0000000000000000000000000000000000000000",
+            web3.eth.accounts[0],
             deploy_script,
         ],
         env={
@@ -49,8 +47,6 @@ def deploy(
         stderr=subprocess.PIPE,
     )
     stdout, stderr = proc.communicate()
-
-    anvil_autoImpersonateAccount(web3, False)
 
     if proc.returncode != 0:
         print(stdout)
