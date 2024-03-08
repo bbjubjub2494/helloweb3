@@ -35,7 +35,7 @@ class PwnChallengeLauncher(Launcher):
         return 0
 
     def is_solved(self, addr: str) -> bool:
-        web3 = get_web3()
+        web3 = get_web3(self.metadata[self.team]["token"])
 
         (result,) = abi.decode(
             ["bool"],

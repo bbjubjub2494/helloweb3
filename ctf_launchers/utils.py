@@ -9,6 +9,7 @@ from web3.types import RPCResponse
 
 def deploy(
     web3: Web3,
+    token,
     project_location: str,
     mnemonic: str,
     deploy_script: str = "script/Deploy.s.sol:Deploy",
@@ -21,7 +22,7 @@ def deploy(
             "/opt/foundry/bin/forge",
             "script",
             "--rpc-url",
-            web3.provider.endpoint_uri,
+            f"http://127.0.0.1:1338/{token}",
             "--broadcast",
             "--unlocked",
             "--sender",
@@ -57,41 +58,9 @@ def deploy(
     return result
 
 
-def anvil_setCodeFromFile(
-    web3: Web3,
-    addr: str,
-    target: str,  # "ContractFile.sol:ContractName",
-):
-    file, contract = target.split(":")
-
-    with open(f"/artifacts/out/{file}/{contract}.json", "r") as f:
-        cache = json.load(f)
-
-        bytecode = cache["deployedBytecode"]["object"]
-
-    anvil_setCode(web3, addr, bytecode)
-
-
 def check_error(resp: RPCResponse):
     if "error" in resp:
         raise Exception("rpc exception", resp["error"])
 
-
-def anvil_autoImpersonateAccount(web3: Web3, enabled: bool):
-    check_error(web3.provider.make_request("anvil_autoImpersonateAccount", [enabled]))
-
-
-def anvil_setCode(web3: Web3, addr: str, bytecode: str):
-    check_error(web3.provider.make_request("anvil_setCode", [addr, bytecode]))
-
-
-def anvil_setStorageAt(
-    web3: Web3,
-    addr: str,
-    slot: str,
-    value: str,
-):
-    check_error(web3.provider.make_request("anvil_setStorageAt", [addr, slot, value]))
-
-def get_web3():
-    return Web3(Web3.HTTPProvider("http://localhost:8545"))
+def get_web3(token):
+    return Web3(Web3.IPCProvider(os.path.join("/tmp/geths", token, "geth.ipc")))
