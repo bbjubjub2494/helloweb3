@@ -8,7 +8,6 @@ import time
 from dataclasses import dataclass
 from typing import Callable, Dict, List
 
-import requests
 from eth_account.hdaccount import generate_mnemonic
 
 from ctf_launchers.team_provider import TeamProvider

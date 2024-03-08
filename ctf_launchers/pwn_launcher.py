@@ -1,6 +1,5 @@
 import os
 
-import requests
 from eth_abi import abi
 
 from ctf_launchers.launcher import Action, Launcher

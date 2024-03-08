@@ -3,8 +3,6 @@ import os
 from hashlib import md5
 from typing import Optional
 
-import requests
-
 
 class TeamProvider(abc.ABC):
     @abc.abstractmethod
