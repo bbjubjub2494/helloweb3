@@ -1,10 +1,3 @@
-FROM ghcr.io/foundry-rs/foundry:latest AS foundry
-
-COPY project /project
-
-RUN cd /project && \
-    forge build --out /artifacts/out --cache-path /artifacts/cache
-
 FROM python:3.11-slim as challenge
 
 RUN apt-get update && \
@@ -26,4 +19,5 @@ RUN pip install -r /tmp/requirements.txt
 WORKDIR /home/ctf
 
 COPY . challenge
-COPY --from=foundry /artifacts /artifacts
+
+RUN cd challenge/project/ && forge build
