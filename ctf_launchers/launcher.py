@@ -84,7 +84,7 @@ class Launcher(abc.ABC):
         datadir = os.path.join("/tmp/geths", token)
 
         # run geth in the background
-        proc = subprocess.Popen(["geth", "-dev", "-datadir", datadir])
+        proc = subprocess.Popen(["challenge/geth_with_timeout.sh", "-dev", "-datadir", datadir])
         time.sleep(1)
 
         # fund player account from dev account
