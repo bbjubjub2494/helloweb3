@@ -20,4 +20,4 @@ WORKDIR /home/ctf
 
 COPY . challenge
 
-RUN cd challenge/project/ && forge build
+RUN cd challenge/contracts/ && forge build

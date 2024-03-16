@@ -12,7 +12,7 @@ FLAG = os.getenv("FLAG", "EPFL{flag}")
 class PwnChallengeLauncher(Launcher):
     def __init__(
         self,
-        project_location: str = "challenge/project",
+        project_location: str = "challenge/contracts",
         provider: TeamProvider = get_team_provider(),
     ):
         super().__init__(
