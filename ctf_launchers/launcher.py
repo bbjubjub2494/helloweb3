@@ -15,7 +15,7 @@ from ctf_launchers.team_provider import TeamProvider
 from ctf_launchers.utils import deploy, get_player_account
 
 PUBLIC_HOST = os.getenv("PUBLIC_HOST", "http://127.0.0.1:1338")
-TIMEOUT = int(os.getenv("TIMEOUT", "1440"))
+TIMEOUT = int(os.environ.setdefault("TIMEOUT", "60"))
 
 
 @dataclass
@@ -78,7 +78,7 @@ class Launcher(abc.ABC):
         datadir = os.path.join("/tmp/geths", self.token)
 
         # run geth in the background
-        proc = subprocess.Popen(["challenge/geth_with_timeout.sh", "-dev", "-datadir", datadir])
+        proc = subprocess.Popen(["challenge/with_timeout.sh", "geth", "-dev", "-datadir", datadir])
         time.sleep(1)
 
         # fund player account from dev account
