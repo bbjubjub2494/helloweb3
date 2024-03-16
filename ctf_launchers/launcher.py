@@ -11,14 +11,9 @@ from typing import Callable, Dict, List
 from eth_account.hdaccount import generate_mnemonic
 
 from ctf_launchers.team_provider import TeamProvider
-from ctf_launchers.types import (CreateInstanceRequest, DaemonInstanceArgs,
-                                 LaunchAnvilInstanceArgs, UserData,
-                                 get_player_account,)
-from ctf_launchers.utils import deploy, get_web3
+from ctf_launchers.utils import deploy, get_web3, get_player_account
 
-CHALLENGE = os.getenv("CHALLENGE", "challenge")
 PUBLIC_HOST = os.getenv("PUBLIC_HOST", "http://127.0.0.1:1338")
-
 TIMEOUT = int(os.getenv("TIMEOUT", "1440"))
 
 
@@ -66,12 +61,6 @@ class Launcher(abc.ABC):
         finally:
             self.metadata.close()
         exit(status)
-
-    def get_daemon_instances(self) -> Dict[str, DaemonInstanceArgs]:
-        return {}
-
-    def get_instance_id(self) -> str:
-        return f"chal-{CHALLENGE}-{self.team}".lower()
 
     def update_metadata(self, new_metadata: Dict[str, str]):
         self.metadata[self.team] = new_metadata

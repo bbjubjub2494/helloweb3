@@ -4,7 +4,6 @@ from eth_abi import abi
 
 from ctf_launchers.launcher import Action, Launcher
 from ctf_launchers.team_provider import TeamProvider, get_team_provider
-from ctf_launchers.types import UserData
 from ctf_launchers.utils import deploy, get_web3
 
 FLAG = os.getenv("FLAG", "EPFL{flag}")

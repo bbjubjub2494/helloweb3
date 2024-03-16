@@ -3,9 +3,28 @@ import os
 import subprocess
 from typing import Dict
 
+from eth_account import Account
+from eth_account.account import LocalAccount
+from eth_account.hdaccount import key_from_seed, seed_from_mnemonic
 from web3 import Web3
 from web3.types import RPCResponse
 
+
+DEFAULT_DERIVATION_PATH = "m/44'/60'/0'/0/"
+
+def get_account(mnemonic: str, offset: int) -> LocalAccount:
+    seed = seed_from_mnemonic(mnemonic, "")
+    private_key = key_from_seed(seed, f"{DEFAULT_DERIVATION_PATH}{offset}")
+
+    return Account.from_key(private_key)
+
+
+def get_player_account(mnemonic: str) -> LocalAccount:
+    return get_account(mnemonic, 0)
+
+
+def get_additional_account(mnemonic: str, offset: int) -> LocalAccount:
+    return get_account(mnemonic, offset + 2)
 
 def deploy(
     web3: Web3,
