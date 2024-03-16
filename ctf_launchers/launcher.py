@@ -9,9 +9,10 @@ from dataclasses import dataclass
 from typing import Callable, Dict, List
 
 from eth_account.hdaccount import generate_mnemonic
+from web3 import Web3
 
 from ctf_launchers.team_provider import TeamProvider
-from ctf_launchers.utils import deploy, get_web3, get_player_account
+from ctf_launchers.utils import deploy, get_player_account
 
 PUBLIC_HOST = os.getenv("PUBLIC_HOST", "http://127.0.0.1:1338")
 TIMEOUT = int(os.getenv("TIMEOUT", "1440"))
@@ -35,6 +36,10 @@ class Launcher(abc.ABC):
         self._actions = [
             Action(name="deploy challenge", handler=self.deploy_challenge),
         ] + actions
+
+    @property
+    def web3(self):
+        return Web3(Web3.IPCProvider(os.path.join("/tmp/geths", self.token, "geth.ipc")))
 
     def run(self):
         self.team = self.__team_provider.get_team()
@@ -69,41 +74,41 @@ class Launcher(abc.ABC):
     def deploy_challenge(self) -> int:
         print("deploying challenge...")
 
-        token = secrets.token_hex()
-        datadir = os.path.join("/tmp/geths", token)
+        self.token = secrets.token_hex()
+        datadir = os.path.join("/tmp/geths", self.token)
 
         # run geth in the background
         proc = subprocess.Popen(["challenge/geth_with_timeout.sh", "-dev", "-datadir", datadir])
         time.sleep(1)
 
         # fund player account from dev account
-        web3 = get_web3(token)
-        web3.eth.send_transaction({
-                "from": web3.eth.accounts[0],
-                "to": get_player_account(self.mnemonic).address,
-                "value": web3.to_wei(1, "ether"),
-                })
+        self.fund(get_player_account(self.mnemonic).address)
 
-        challenge_addr = self.deploy(self.mnemonic, token)
+        challenge_addr = self.deploy()
 
         self.update_metadata(
-            {"mnemonic": self.mnemonic, "token": token, "challenge_address": challenge_addr}
+            {"mnemonic": self.mnemonic, "token": self.token, "challenge_address": challenge_addr}
         )
 
         print()
         print(f"your challenge has been deployed")
         print(f"---")
-        print(f"rpc endpoint:       {PUBLIC_HOST}/{token}")
+        print(f"rpc endpoint:       {PUBLIC_HOST}/{self.token}")
         print(f"private key:        {get_player_account(self.mnemonic).key.hex()}")
         print(f"challenge contract: {challenge_addr}")
         return 0
 
-    def deploy(self, mnemonic: str, token: str) -> str:
-        web3 = get_web3(token)
+    def fund(self, address):
+        return self.web3.eth.send_transaction({
+                "from": self.web3.eth.accounts[0],
+                "to": address,
+                "value": self.web3.to_wei(1, "ether"),
+                })
 
+    def deploy(self) -> str:
         return deploy(
-            web3,
-            token,
+            self.web3,
+            self.token,
             self.project_location,
-            mnemonic,
+            self.mnemonic,
         )

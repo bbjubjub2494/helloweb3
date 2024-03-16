@@ -6,7 +6,6 @@ from typing import Dict
 from eth_account import Account
 from eth_account.account import LocalAccount
 from eth_account.hdaccount import key_from_seed, seed_from_mnemonic
-from web3 import Web3
 from web3.types import RPCResponse
 
 
@@ -27,7 +26,7 @@ def get_additional_account(mnemonic: str, offset: int) -> LocalAccount:
     return get_account(mnemonic, offset + 2)
 
 def deploy(
-    web3: Web3,
+    web3,
     token,
     project_location: str,
     mnemonic: str,
@@ -80,6 +79,3 @@ def deploy(
 def check_error(resp: RPCResponse):
     if "error" in resp:
         raise Exception("rpc exception", resp["error"])
-
-def get_web3(token):
-    return Web3(Web3.IPCProvider(os.path.join("/tmp/geths", token, "geth.ipc")))
