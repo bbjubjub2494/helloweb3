@@ -4,7 +4,9 @@ import shelve
 import secrets
 import traceback
 import subprocess
+import sys
 import time
+import hashlib
 from dataclasses import dataclass
 from typing import Callable, Dict, List
 
@@ -16,6 +18,20 @@ from ctf_launchers.utils import deploy, get_player_account
 PUBLIC_HOST = os.getenv("PUBLIC_HOST", "http://127.0.0.1:8545")
 TIMEOUT = int(os.environ.setdefault("TIMEOUT", "60"))
 
+# copied from: https://github.com/balsn/proof-of-work
+class NcPowser:
+    def __init__(self, difficulty=22, prefix_length=16):
+        self.difficulty = difficulty
+        self.prefix_length = prefix_length
+
+    def get_challenge(self):
+        return secrets.token_urlsafe(self.prefix_length)[:self.prefix_length].replace('-', 'b').replace('_', 'a')
+
+    def verify_hash(self, prefix, answer):
+        h = hashlib.sha256()
+        h.update((prefix + answer).encode())
+        bits = ''.join(bin(i)[2:].zfill(8) for i in h.digest())
+        return bits.startswith('0' * self.difficulty)
 
 @dataclass
 class Action:
@@ -74,6 +90,17 @@ class Launcher(abc.ABC):
         self.token = token
 
     def deploy_challenge(self):
+        powser = NcPowser()
+        prefix = powser.get_challenge()
+        print(f"please : sha256({prefix} + ???) == {'0'*powser.difficulty}({powser.difficulty})... ")
+        print(f"prefix: {prefix}")
+        print(f"difficulty: {powser.difficulty}")
+        sys.stdout.flush()
+        answer = input(" >")
+        if not powser.verify_hash(prefix, answer):
+            print("no etherbase for you")
+            exit(0)
+
         print("deploying challenge...")
 
         self.mnemonic = generate_mnemonic(12, lang="english")

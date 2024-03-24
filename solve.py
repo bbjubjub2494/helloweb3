@@ -39,4 +39,6 @@ r = remote('localhost', 1337)
 
 r.recvuntil(b'action? ')
 r.sendline(b'2')
+r.recvuntil(b'token? ')
+r.sendline(token)
 r.interactive()
