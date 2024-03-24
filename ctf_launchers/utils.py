@@ -1,7 +1,5 @@
-import json
 import os
 import subprocess
-from typing import Dict
 
 from eth_account import Account
 from eth_account.account import LocalAccount
@@ -31,7 +29,7 @@ def deploy(
     project_location: str,
     mnemonic: str,
     deploy_script: str = "script/Deploy.s.sol:Deploy",
-    env: Dict = {},
+    env: dict = {},
 ) -> str:
     rfd, wfd = os.pipe2(os.O_NONBLOCK)
 
