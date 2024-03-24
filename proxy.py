@@ -20,4 +20,4 @@ class HTTPRequestHandler(BaseHTTPRequestHandler):
         self.end_headers()
         self.wfile.write(response.encode())
 
-ThreadingHTTPServer(('', 1338), HTTPRequestHandler).serve_forever()
+ThreadingHTTPServer(('', 8545), HTTPRequestHandler).serve_forever()

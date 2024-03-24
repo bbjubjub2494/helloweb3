@@ -6,7 +6,7 @@ services:
     command: sh -c "python3 -u challenge/proxy.py & socat TCP-LISTEN:1337,reuseaddr,fork exec:'python3 -u challenge/challenge.py'"
     expose:
       - 1337
-      - 1338
+      - 8545
     ports:
       - "1337:1337"
-      - "1338:1338"
+      - "8545:8545"

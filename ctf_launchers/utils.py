@@ -40,7 +40,7 @@ def deploy(
             "/opt/foundry/bin/forge",
             "script",
             "--rpc-url",
-            f"http://127.0.0.1:1338/{token}",
+            f"http://127.0.0.1:8545/{token}",
             "--broadcast",
             "--unlocked",
             "--sender",

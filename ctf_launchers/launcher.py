@@ -14,7 +14,7 @@ from web3 import Web3
 from ctf_launchers.team_provider import TeamProvider
 from ctf_launchers.utils import deploy, get_player_account
 
-PUBLIC_HOST = os.getenv("PUBLIC_HOST", "http://127.0.0.1:1338")
+PUBLIC_HOST = os.getenv("PUBLIC_HOST", "http://127.0.0.1:8545")
 TIMEOUT = int(os.environ.setdefault("TIMEOUT", "60"))
 
 
