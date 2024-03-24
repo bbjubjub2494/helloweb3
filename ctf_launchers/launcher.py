@@ -11,7 +11,6 @@ from typing import Callable, Dict, List
 from eth_account.hdaccount import generate_mnemonic
 from web3 import Web3
 
-from ctf_launchers.team_provider import TeamProvider
 from ctf_launchers.utils import deploy, get_player_account
 
 PUBLIC_HOST = os.getenv("PUBLIC_HOST", "http://127.0.0.1:8545")
@@ -26,10 +25,9 @@ class Action:
 
 class Launcher(abc.ABC):
     def __init__(
-        self, project_location: str, provider: TeamProvider, actions: List[Action] = []
+        self, project_location: str, actions: List[Action] = []
     ):
         self.project_location = project_location
-        self.__team_provider = provider
 
         self.metadata = shelve.open("metadata.db")
 
@@ -42,12 +40,6 @@ class Launcher(abc.ABC):
         return Web3(Web3.IPCProvider(os.path.join("/tmp/geths", self.token, "geth.ipc")))
 
     def run(self):
-        self.team = self.__team_provider.get_team()
-        if not self.team:
-            exit(1)
-
-        self.mnemonic = generate_mnemonic(12, lang="english")
-
         for i, action in enumerate(self._actions):
             print(f"{i+1} - {action.name}")
 
@@ -62,18 +54,29 @@ class Launcher(abc.ABC):
         except Exception as e:
             traceback.print_exc()
             print("an error occurred", e)
-            status = 1
+            exit(1)
         finally:
             self.metadata.close()
-        exit(status)
+        exit(0)
 
     def update_metadata(self, new_metadata: Dict[str, str]):
-        self.metadata[self.team] = new_metadata
+        self.metadata[self.token] = new_metadata
         pass
 
-    def deploy_challenge(self) -> int:
+    def request_token(self):
+        token = input("token? ")
+        if not token.isalnum():
+            print("bad token")
+            exit(1)
+        if token not in self.metadata:
+            print("instance not found")
+            exit(1)
+        self.token = token
+
+    def deploy_challenge(self):
         print("deploying challenge...")
 
+        self.mnemonic = generate_mnemonic(12, lang="english")
         self.token = secrets.token_hex()
         datadir = os.path.join("/tmp/geths", self.token)
 
@@ -88,16 +91,16 @@ class Launcher(abc.ABC):
         challenge_addr = self.deploy()
 
         self.update_metadata(
-            {"mnemonic": self.mnemonic, "token": self.token, "challenge_address": challenge_addr}
+            {"mnemonic": self.mnemonic, "challenge_address": challenge_addr}
         )
 
         print()
         print(f"your challenge has been deployed")
         print(f"---")
+        print(f"token:              {self.token}")
         print(f"rpc endpoint:       {PUBLIC_HOST}/{self.token}")
         print(f"private key:        {get_player_account(self.mnemonic).key.hex()}")
         print(f"challenge contract: {challenge_addr}")
-        return 0
 
     def fund(self, address):
         return self.web3.eth.send_transaction({
