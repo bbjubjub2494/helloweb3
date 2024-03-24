@@ -79,7 +79,7 @@ class Launcher(abc.ABC):
 
         # run geth in the background
         proc = subprocess.Popen(["challenge/with_timeout.sh", "geth", "-dev", "-datadir", datadir])
-        while not os.access(os.path.join("/tmp/geths", token, "geth.ipc"), os.R_OK):
+        while not os.access(os.path.join("/tmp/geths", self.token, "geth.ipc"), os.R_OK):
             time.sleep(1)
 
         # fund player account from dev account
