@@ -108,7 +108,7 @@ class Launcher(abc.ABC):
         datadir = os.path.join("/tmp/geths", self.token)
 
         # run geth in the background
-        proc = subprocess.Popen(["challenge/with_timeout.sh", "geth", "-dev", "-datadir", datadir])
+        proc = subprocess.Popen(["challenge/with_timeout.sh", "geth", "-dev", "-datadir", datadir], stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL)
         while not os.access(os.path.join("/tmp/geths", self.token, "geth.ipc"), os.R_OK):
             time.sleep(1)
 
