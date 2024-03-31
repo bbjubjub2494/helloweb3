@@ -1,4 +1,6 @@
+import io
 import os
+import socketserver
 import subprocess
 
 from eth_account import Account
@@ -77,3 +79,18 @@ def deploy(
 def check_error(resp: RPCResponse):
     if "error" in resp:
         raise Exception("rpc exception", resp["error"])
+
+
+class TextIORequestHandler(socketserver.StreamRequestHandler):
+    def setup(self):
+        super().setup()
+        self.wfile = io.TextIOWrapper(self.wfile)
+        self.rfile = io.TextIOWrapper(self.rfile)
+
+    def print(self, *args, sep=' ', end='\n', flush=False):
+        print(*args, sep=sep, end=end, file=self.wfile, flush=flush)
+
+    def input(self, prompt=''):
+        self.wfile.write(prompt)
+        self.wfile.flush()
+        return self.rfile.readline().strip()

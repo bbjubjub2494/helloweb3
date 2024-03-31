@@ -1,10 +1,8 @@
 import abc
 import os
-import shelve
 import secrets
 import traceback
 import subprocess
-import sys
 import time
 import hashlib
 from dataclasses import dataclass
@@ -13,7 +11,7 @@ from typing import Callable, Dict, List
 from eth_account.hdaccount import generate_mnemonic
 from web3 import Web3
 
-from ctf_launchers.utils import deploy, get_player_account
+from ctf_launchers.utils import TextIORequestHandler, deploy, get_player_account
 
 PUBLIC_HOST = os.getenv("PUBLIC_HOST", "http://127.0.0.1:8545")
 TIMEOUT = int(os.environ.setdefault("TIMEOUT", "60"))
@@ -36,72 +34,68 @@ class NcPowser:
 @dataclass
 class Action:
     name: str
-    handler: Callable[[], int]
+    handler: Callable[[], None]
 
 
-class Launcher(abc.ABC):
+class Launcher(TextIORequestHandler, abc.ABC):
+    metadata = {} # global variable 
+
     def __init__(
-        self, project_location: str, actions: List[Action] = []
+        self, request, client_address, server, project_location: str, actions: List[Action] = []
     ):
         self.project_location = project_location
-
-        self.metadata = shelve.open("metadata.db")
 
         self._actions = [
             Action(name="deploy challenge", handler=self.deploy_challenge),
         ] + actions
+        super().__init__(request, client_address, server)
 
     @property
     def web3(self):
         return Web3(Web3.IPCProvider(os.path.join("/tmp/geths", self.token, "geth.ipc")))
 
-    def run(self):
+    def handle(self):
         for i, action in enumerate(self._actions):
-            print(f"{i+1} - {action.name}")
+            self.print(f"{i+1} - {action.name}")
 
         try:
-            handler = self._actions[int(input("action? ")) - 1]
+            handler = self._actions[int(self.input("action? ")) - 1]
         except:
-            print("can you not")
-            exit(1)
+            self.print("can you not")
 
         try:
-            status = handler.handler()
+            handler.handler()
         except Exception as e:
             traceback.print_exc()
             print("an error occurred", e)
-            exit(1)
-        finally:
-            self.metadata.close()
-        exit(0)
 
     def update_metadata(self, new_metadata: Dict[str, str]):
         self.metadata[self.token] = new_metadata
         pass
 
     def request_token(self):
-        token = input("token? ")
+        token = self.input("token? ")
         if not token.isalnum():
-            print("bad token")
-            exit(1)
+            self.print("bad token")
+            raise Exception("bad token")
         if token not in self.metadata:
-            print("instance not found")
-            exit(1)
+            self.print("instance not found")
+            raise Exception("instance not found")
         self.token = token
 
     def deploy_challenge(self):
         powser = NcPowser()
         prefix = powser.get_challenge()
-        print(f"please : sha256({prefix} + ???) == {'0'*powser.difficulty}({powser.difficulty})... ")
-        print(f"prefix: {prefix}")
-        print(f"difficulty: {powser.difficulty}")
-        sys.stdout.flush()
-        answer = input(" >")
+        self.print(f"please : sha256({prefix} + ???) == {'0'*powser.difficulty}({powser.difficulty})... ")
+        self.print(f"prefix: {prefix}")
+        self.print(f"difficulty: {powser.difficulty}")
+        self.wfile.flush()
+        answer = self.input(" >")
         if not powser.verify_hash(prefix, answer):
-            print("no etherbase for you")
-            exit(0)
+            self.print("no etherbase for you")
+            raise Exception("invalid pow")
 
-        print("deploying challenge...")
+        self.print("deploying challenge...")
 
         self.mnemonic = generate_mnemonic(12, lang="english")
         self.token = secrets.token_hex()
@@ -121,13 +115,13 @@ class Launcher(abc.ABC):
             {"mnemonic": self.mnemonic, "challenge_address": challenge_addr}
         )
 
-        print()
-        print(f"your challenge has been deployed")
-        print(f"---")
-        print(f"token:              {self.token}")
-        print(f"rpc endpoint:       {PUBLIC_HOST}/{self.token}")
-        print(f"private key:        {get_player_account(self.mnemonic).key.hex()}")
-        print(f"challenge contract: {challenge_addr}")
+        self.print()
+        self.print(f"your challenge has been deployed")
+        self.print(f"---")
+        self.print(f"token:              {self.token}")
+        self.print(f"rpc endpoint:       {PUBLIC_HOST}/{self.token}")
+        self.print(f"private key:        {get_player_account(self.mnemonic).key.hex()}")
+        self.print(f"challenge contract: {challenge_addr}")
 
     def fund(self, address):
         return self.web3.eth.send_transaction({

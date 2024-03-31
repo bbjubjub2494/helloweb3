@@ -9,10 +9,10 @@ FLAG = os.getenv("FLAG", "EPFL{flag}")
 
 class PwnChallengeLauncher(Launcher):
     def __init__(
-        self,
+        self, request, client_address, server,
         project_location: str = "challenge/contracts",
     ):
-        super().__init__(
+        super().__init__(request, client_address, server,
             project_location,
             [
                 Action(name="get flag", handler=self.get_flag),
@@ -24,11 +24,10 @@ class PwnChallengeLauncher(Launcher):
         addr = self.metadata[self.token]["challenge_address"]
 
         if not self.is_solved(addr):
-            print("are you sure you solved it?")
-            return 1
+            self.print("are you sure you solved it?")
+            return
 
-        print(FLAG)
-        return 0
+        self.print(FLAG)
 
     def is_solved(self, addr: str) -> bool:
         (result,) = abi.decode(
