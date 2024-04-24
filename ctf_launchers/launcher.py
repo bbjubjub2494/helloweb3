@@ -62,6 +62,7 @@ class Launcher(TextIORequestHandler, abc.ABC):
             handler = self._actions[int(self.input("action? ")) - 1]
         except:
             self.print("can you not")
+            return
 
         try:
             handler.handler()
