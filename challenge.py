@@ -1,11 +1,13 @@
 import socketserver
 
-from ctf_launchers.pwn_launcher import PwnChallengeLauncher
+from lib.base import ChallengeBase
 
 
-class Challenge(PwnChallengeLauncher):
+class Challenge(ChallengeBase):
     pass
 
 
-with socketserver.ThreadingTCPServer(('0.0.0.0', 1337), Challenge) as server:
+with socketserver.ThreadingTCPServer(
+    ("0.0.0.0", 1337), Challenge.make_handler_class()
+) as server:
     server.serve_forever()
