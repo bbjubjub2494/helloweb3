@@ -29,15 +29,15 @@ class ChallengeBase(util.TextStreamRequestHandler, ABC):
 
     def handle(self) -> None:
         for i, a in enumerate(self.actions):
-            self.print(f"{i} - {a.description}")
+            self.print(f"{i+1} - {a.description}")
         choice = self.input("> ")
         try:
-            handler = self.actions[int(choice)].handler
+            handler = self.actions[int(choice)-1].handler
         except:
             self.print("ngmi")
             return
         loop = asyncio.new_event_loop()
-        loop.run_until_complete(handler)
+        loop.run_until_complete(handler())
 
     @classmethod
     def make_handler_class(cls) -> type[socketserver.BaseRequestHandler]:
