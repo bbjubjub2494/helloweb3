@@ -3,8 +3,10 @@ from abc import *
 import socketserver
 import typing
 
+from . import util
 
-class ChallengeBase(socketserver.StreamRequestHandler, ABC):
+
+class ChallengeBase(util.TextStreamRequestHandler, ABC):
     @property
     @abstractmethod
     def metadata(self) -> dict[str, typing.Any]:
@@ -12,10 +14,10 @@ class ChallengeBase(socketserver.StreamRequestHandler, ABC):
         pass
 
     def handle(self) -> None:
-        self.wfile.write(b"hello web3\n")
+        self.print("hello web3")
 
     @classmethod
-    def make_handler_class(cls) -> type[socketserver.StreamRequestHandler]:
+    def make_handler_class(cls) -> type[socketserver.BaseRequestHandler]:
         metadata: dict[str, typing.Any] = {}  # global variable
 
         class RequestHandler(cls):
