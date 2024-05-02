@@ -17,6 +17,7 @@ class Action:
 class ChallengeBase(util.TextStreamRequestHandler, ABC):
     # per-subclass key value database to store challenge instance information
     metadata: dict[str, typing.Any]
+    event_loop: asyncio.AbstractEventLoop
 
     @property
     def actions(self) -> list[Action]:
@@ -36,16 +37,17 @@ class ChallengeBase(util.TextStreamRequestHandler, ABC):
         except:
             self.print("ngmi")
             return
-        loop = asyncio.new_event_loop()
-        loop.run_until_complete(handler())
+        future = asyncio.run_coroutine_threadsafe(handler(), self.event_loop)
+        return future.result()
 
     @classmethod
-    def make_handler_class(cls) -> type[socketserver.BaseRequestHandler]:
+    def make_handler_class(cls, event_loop) -> type[socketserver.BaseRequestHandler]:
         metadata: dict[str, typing.Any] = {}
 
         class RequestHandler(cls):
             def __init__(self, request, client_address, server) -> None:
-                super().__init__(request, client_address, server)
                 self.metadata = metadata
+                self.event_loop = event_loop
+                super().__init__(request, client_address, server)
 
         return RequestHandler
