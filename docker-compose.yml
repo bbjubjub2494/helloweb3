@@ -1,9 +1,9 @@
-version: "3"
 services:
   challenge:
     build:
       context: .
-    command: sh -c "python3 -u challenge/proxy.py & socat TCP-LISTEN:1337,reuseaddr,fork exec:'python3 -u challenge/challenge.py'"
+    working_dir: /home/ctf/challenge
+    command: sh -c "python3 proxy.py & python3 challenge.py"
     expose:
       - 1337
       - 8545
