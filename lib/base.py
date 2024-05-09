@@ -3,6 +3,7 @@ from abc import *
 import asyncio
 import dataclasses
 import os
+import io
 import secrets
 import socketserver
 import typing
@@ -10,7 +11,7 @@ import typing
 from eth_account.hdaccount import generate_mnemonic
 from web3 import Web3
 
-from .internal.util import TextStreamRequestHandler, deploy, get_player_account
+from .internal.util import deploy, get_player_account
 from .internal.pow import Pow
 
 
@@ -24,11 +25,26 @@ class Action:
     handler: typing.Callable[[], typing.Awaitable[None]]
 
 
-class ChallengeBase(ABC, Pow, TextStreamRequestHandler):
+class ChallengeBase(ABC, Pow):
     # per-subclass key value database to store challenge instance information
     metadata: dict[str, typing.Any]
-    event_loop: asyncio.AbstractEventLoop
     token: str
+
+    def __init__(self, reader, writer, metadata):
+        self._reader = reader
+        self._writer = writer
+        self.metadata = metadata
+
+    async def print(self, *args, sep=" ", end="\n", flush=False):
+        buf = io.StringIO()
+        print(*args, sep=sep, end=end, file=buf, flush=flush)
+        self._writer.write(buf.getvalue().encode())
+        await self._writer.drain()
+
+    async def input(self, prompt=""):
+        self._writer.write(prompt.encode())
+        await self._writer.drain()
+        return (await self._reader.readline()).strip()
 
     def update_metadata(self, new_metadata: dict[str, str]):
         self.metadata[self.token] = new_metadata
@@ -47,22 +63,22 @@ class ChallengeBase(ABC, Pow, TextStreamRequestHandler):
         )
 
     async def _say_hello(self) -> None:
-        self.print("hello web3")
+        await self.print("hello web3")
 
     async def request_token(self):
-        token = self.input("token? ")
+        token = await self.input("token? ")
         if not token.isalnum():
-            self.print("bad token")
+            await self.print("bad token")
             raise Exception("bad token")
         if token not in self.metadata:
-            self.print("instance not found")
+            await self.print("instance not found")
             raise Exception("instance not found")
         self.token = token
 
     async def _deploy_challenge(self):
         self.require_pow()
 
-        self.print("deploying challenge...")
+        await self.print("deploying challenge...")
 
         self.mnemonic = generate_mnemonic(12, lang="english")
         self.token = secrets.token_hex()
@@ -86,16 +102,16 @@ class ChallengeBase(ABC, Pow, TextStreamRequestHandler):
                     {"mnemonic": self.mnemonic, "challenge_address": challenge_addr}
                 )
 
-                self.print()
-                self.print(f"your challenge has been deployed")
-                self.print(f"it will be stopped in {TIMEOUT} seconds")
-                self.print(f"---")
-                self.print(f"token:              {self.token}")
-                self.print(f"rpc endpoint:       {PUBLIC_HOST}/{self.token}")
-                self.print(
+                await self.print()
+                await self.print(f"your challenge has been deployed")
+                await self.print(f"it will be stopped in {TIMEOUT} seconds")
+                await self.print(f"---")
+                await self.print(f"token:              {self.token}")
+                await self.print(f"rpc endpoint:       {PUBLIC_HOST}/{self.token}")
+                await self.print(
                     f"private key:        {get_player_account(self.mnemonic).key.hex()}"
                 )
-                self.print(f"challenge contract: {challenge_addr}")
+                await self.print(f"challenge contract: {challenge_addr}")
                 await asyncio.sleep(TIMEOUT)
         finally:
             geth.terminate()
@@ -120,35 +136,22 @@ class ChallengeBase(ABC, Pow, TextStreamRequestHandler):
             self.mnemonic,
         )
 
-    def prompt_action(self) -> Action:
+    async def prompt_action(self) -> Action:
         actions = self.actions
         if len(actions) == 0:
             return Action("say hello", self._say_hello)
         elif len(actions) == 1:
             return actions[0]
         for i, a in enumerate(actions):
-            self.print(f"{i+1} - {a.description}")
+            await self.print(f"{i+1} - {a.description}")
         while True:
             try:
-                choice = int(self.input("> "))
+                choice = int(await self.input("> "))
             except ValueError:
                 continue
             if 1 <= choice <= len(actions):
                 return actions[choice - 1]
 
-    def handle(self) -> None:
-        action = self.prompt_action()
-        future = asyncio.run_coroutine_threadsafe(action.handler(), self.event_loop)
-        future.result()
-
-    @classmethod
-    def make_handler_class(cls, event_loop) -> type[socketserver.BaseRequestHandler]:
-        metadata: dict[str, typing.Any] = {}
-
-        class RequestHandler(cls):
-            def __init__(self, request, client_address, server) -> None:
-                self.metadata = metadata
-                self.event_loop = event_loop
-                super().__init__(request, client_address, server)
-
-        return RequestHandler
+    async def handle(self) -> None:
+        action = await self.prompt_action()
+        await action.handler()

@@ -6,21 +6,6 @@ import socketserver
 from eth_account import Account
 Account.enable_unaudited_hdwallet_features()
 
-
-class TextStreamRequestHandler(socketserver.StreamRequestHandler):
-    def setup(self):
-        super().setup()
-        self.wfile = io.TextIOWrapper(self.wfile)
-        self.rfile = io.TextIOWrapper(self.rfile)
-
-    def print(self, *args, sep=" ", end="\n", flush=False):
-        print(*args, sep=sep, end=end, file=self.wfile, flush=flush)
-
-    def input(self, prompt=""):
-        self.wfile.write(prompt)
-        self.wfile.flush()
-        return self.rfile.readline().strip()
-
 def _get_account(mnemonic, n):
     return Account.from_mnemonic(mnemonic,account_path=f"m/44'/60'/0'/0/{n}")
 

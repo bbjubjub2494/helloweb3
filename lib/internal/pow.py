@@ -1,8 +1,6 @@
 import hashlib
 import secrets
 
-from .util import TextStreamRequestHandler
-
 
 # copied from: https://github.com/balsn/proof-of-work
 class NcPowser:
@@ -19,14 +17,14 @@ class NcPowser:
         bits = ''.join(bin(i)[2:].zfill(8) for i in h.digest())
         return bits.startswith('0' * self.difficulty)
 
-class Pow(TextStreamRequestHandler):
+class Pow:
     async def require_pow(self):
         powser = NcPowser()
         prefix = powser.get_challenge()
-        self.print(f"please : sha256({prefix} + ???) == {'0'*powser.difficulty}({powser.difficulty})... ")
-        self.print(f"prefix: {prefix}")
-        self.print(f"difficulty: {powser.difficulty}")
-        answer = self.input(" >")
+        await self.print(f"please : sha256({prefix} + ???) == {'0'*powser.difficulty}({powser.difficulty})... ")
+        await self.print(f"prefix: {prefix}")
+        await self.print(f"difficulty: {powser.difficulty}")
+        answer = await self.input(" >")
         if not powser.verify_hash(prefix, answer):
-            self.print("no etherbase for you")
+            await self.print("no etherbase for you")
             raise Exception("invalid pow")
