@@ -1,6 +1,7 @@
 from abc import *
 
 import asyncio
+import contextlib
 import dataclasses
 import os
 import io
@@ -153,5 +154,6 @@ class ChallengeBase(ABC, Pow):
                 return actions[choice - 1]
 
     async def handle(self) -> None:
-        action = await self.prompt_action()
-        await action.handler()
+        with contextlib.closing(self._writer), contextlib.closing(self._reader):
+            action = await self.prompt_action()
+            await action.handler()
