@@ -119,17 +119,26 @@ class ChallengeBase(ABC, Pow, TextStreamRequestHandler):
             self.mnemonic,
         )
 
-    def handle(self) -> None:
-        for i, a in enumerate(self.actions):
+    def prompt_action(self) -> Action:
+        actions = self.actions
+        if len(actions) == 0:
+            return Action("say hello", self._say_hello)
+        elif len(actions) == 1:
+            return actions[0]
+        for i, a in enumerate(actions):
             self.print(f"{i+1} - {a.description}")
-        choice = self.input("> ")
-        try:
-            handler = self.actions[int(choice) - 1].handler
-        except:
-            self.print("ngmi")
-        else:
-            future = asyncio.run_coroutine_threadsafe(handler(), self.event_loop)
-            future.result()
+        while True:
+            try:
+                choice = int(self.input("> "))
+            except ValueError:
+                continue
+            if 1 <= choice <= len(actions):
+                return actions[choice - 1]
+
+    def handle(self) -> None:
+        action = self.prompt_action()
+        future = asyncio.run_coroutine_threadsafe(action.handler(), self.event_loop)
+        future.result()
 
     @classmethod
     def make_handler_class(cls, event_loop) -> type[socketserver.BaseRequestHandler]:
