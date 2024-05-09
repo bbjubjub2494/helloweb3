@@ -70,13 +70,13 @@ class ChallengeBase(ABC, Pow, TextStreamRequestHandler):
 
         # run geth in the background
         geth = await asyncio.create_subprocess_exec("geth", "-dev", "-datadir", datadir)
-        while not os.access(
-            os.path.join("/tmp/geths", self.token, "geth.ipc"), os.R_OK
-        ):
-            await asyncio.sleep(1)
 
         try:
             async with asyncio.timeout(TIMEOUT):
+                while not os.access(
+                    os.path.join("/tmp/geths", self.token, "geth.ipc"), os.R_OK
+                ):
+                    await asyncio.sleep(1)
                 # fund player account from dev account
                 await self.fund(get_player_account(self.mnemonic).address)
 
@@ -96,6 +96,7 @@ class ChallengeBase(ABC, Pow, TextStreamRequestHandler):
                     f"private key:        {get_player_account(self.mnemonic).key.hex()}"
                 )
                 self.print(f"challenge contract: {challenge_addr}")
+                await asyncio.sleep(TIMEOUT)
         finally:
             geth.terminate()
             await geth.wait()
