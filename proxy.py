@@ -10,11 +10,10 @@ class HTTPRequestHandler(BaseHTTPRequestHandler):
         length = int(self.headers.get("Content-Length"))
         message = json.loads(self.rfile.read(length))
         method, params = message["method"], message.get("params")
-        path = os.path.join(
-            "/tmp/geths/", posixpath.normpath(self.path).lstrip("/"), "geth.ipc"
-        )
+        token = posixpath.normpath(self.path).lstrip("/")
+        ipc_path = os.path.join("/tmp/anvils", token)
 
-        provider = web3.IPCProvider(path)
+        provider = web3.IPCProvider(ipc_path)
         response = json.dumps(provider.make_request(method, params))
 
         self.send_response(200)

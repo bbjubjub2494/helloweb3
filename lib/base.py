@@ -54,13 +54,17 @@ class ChallengeBase(ABC, Pow):
     def actions(self) -> list[Action]:
         return [
             Action("deploy", self._deploy_challenge),
-            Action("say hello", self._say_hello),
+            self.default_action,
         ]
+
+    @property
+    def default_action(self) -> Action:
+        return Action("say hello", self._say_hello)
 
     @property
     def web3(self):
         return Web3(
-            Web3.IPCProvider(os.path.join("/tmp/geths", self.token, "geth.ipc"))
+            Web3.IPCProvider(os.path.join("/tmp/anvils", self.token))
         )
 
     async def _say_hello(self) -> None:
@@ -83,19 +87,16 @@ class ChallengeBase(ABC, Pow):
 
         self.mnemonic = generate_mnemonic(12, lang="english")
         self.token = secrets.token_hex()
-        datadir = os.path.join("/tmp/geths", self.token)
+        os.makedirs("/tmp/anvils", exist_ok=True)
+        ipc_path = os.path.join("/tmp/anvils", self.token)
 
-        # run geth in the background
-        geth = await asyncio.create_subprocess_exec("geth", "-dev", "-datadir", datadir)
+        # run anvil in the background
+        anvil = await asyncio.create_subprocess_exec("anvil", "--port", "0", "--ipc", ipc_path, "-m", self.mnemonic)
 
         try:
             async with asyncio.timeout(TIMEOUT):
-                while not os.access(
-                    os.path.join("/tmp/geths", self.token, "geth.ipc"), os.R_OK
-                ):
+                while not os.access(ipc_path, os.R_OK):
                     await asyncio.sleep(1)
-                # fund player account from dev account
-                await self.fund(get_player_account(self.mnemonic).address)
 
                 challenge_addr = await self.deploy()
 
@@ -115,18 +116,8 @@ class ChallengeBase(ABC, Pow):
                 await self.print(f"challenge contract: {challenge_addr}")
                 await asyncio.sleep(TIMEOUT)
         finally:
-            geth.terminate()
-            await geth.wait()
-
-    async def fund(self, address):
-        tx = self.web3.eth.send_transaction(
-            {
-                "from": self.web3.eth.accounts[0],
-                "to": address,
-                "value": self.web3.to_wei(1, "ether"),
-            }
-        )
-        return await asyncio.to_thread(self.web3.eth.wait_for_transaction_receipt, tx)
+            anvil.terminate()
+            await anvil.wait()
 
     async def deploy(self) -> str:
         return await asyncio.to_thread(
@@ -147,13 +138,13 @@ class ChallengeBase(ABC, Pow):
             await self.print(f"{i+1} - {a.description}")
         while True:
             try:
-                choice = int(await self.input("> "))
+                choice = int(await self.input("action? "))
             except ValueError:
                 continue
             if 1 <= choice <= len(actions):
                 return actions[choice - 1]
 
     async def handle(self) -> None:
-        with contextlib.closing(self._writer), contextlib.closing(self._reader):
+        with contextlib.closing(self._writer):
             action = await self.prompt_action()
             await action.handler()
