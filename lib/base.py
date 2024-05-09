@@ -44,7 +44,7 @@ class ChallengeBase(ABC, Pow):
     async def input(self, prompt=""):
         self._writer.write(prompt.encode())
         await self._writer.drain()
-        return (await self._reader.readline()).strip()
+        return (await self._reader.readline()).decode().strip()
 
     def update_metadata(self, new_metadata: dict[str, str]):
         self.metadata[self.token] = new_metadata
@@ -76,7 +76,7 @@ class ChallengeBase(ABC, Pow):
         self.token = token
 
     async def _deploy_challenge(self):
-        self.require_pow()
+        await self.require_pow()
 
         await self.print("deploying challenge...")
 
