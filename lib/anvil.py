@@ -55,7 +55,7 @@ class ChallengeWithAnvil(ChallengeBase):
             while not os.access(ipc_path, os.R_OK):
                 await asyncio.sleep(1)
 
-            challenge_addr = await asyncio.to_thread(
+            self.challenge_addr = await asyncio.to_thread(
                 deploy,
                 self.web3,
                 self.token,
@@ -72,7 +72,7 @@ class ChallengeWithAnvil(ChallengeBase):
             await conn.print(
                 f"private key:        {get_player_account(self.mnemonic).key.hex()}"
             )
-            await conn.print(f"challenge contract: {challenge_addr}")
+            await conn.print(f"challenge contract: {self.challenge_addr}")
             # continue in the background from now on
             conn.close()
             await asyncio.sleep(TIMEOUT)

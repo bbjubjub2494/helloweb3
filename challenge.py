@@ -2,10 +2,11 @@ import asyncio
 import socketserver
 
 from lib.pow import ChallengeWithAnvilAndPow
+from lib.pwn import PwnChallengeWithAnvil
 from lib.connection import Connection
 
 
-class Challenge(ChallengeWithAnvilAndPow):
+class Challenge(PwnChallengeWithAnvil, ChallengeWithAnvilAndPow):
     pass
 
 
