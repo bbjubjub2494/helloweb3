@@ -19,7 +19,7 @@ class HTTPRequestHandler(BaseHTTPRequestHandler):
         token = posixpath.normpath(self.path).lstrip("/")
         ipc_path = os.path.join("/tmp/anvils", token)
 
-        if not _ALLOW.search(method):
+        if not self._ALLOW.search(method):
             self.send_error(http.HTTPStatus.NOT_ALLOWED, "forbidden RPC method")
             return
 
