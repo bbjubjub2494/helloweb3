@@ -76,6 +76,8 @@ class ChallengeWithAnvil(ChallengeBase, Pow):
                     f"private key:        {get_player_account(self.mnemonic).key.hex()}"
                 )
                 await self.print(f"challenge contract: {challenge_addr}")
+                # continue in the background from now on
+                self._writer.close()
                 await asyncio.sleep(TIMEOUT)
         finally:
             anvil.terminate()
