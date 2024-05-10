@@ -1,23 +1,7 @@
-from abc import *
-
-import asyncio
 import contextlib
 import dataclasses
-import os
 import io
-import secrets
-import socketserver
 import typing
-
-from eth_account.hdaccount import generate_mnemonic
-from web3 import Web3
-
-from .internal.util import deploy, get_player_account
-from .internal.pow import Pow
-
-
-PUBLIC_HOST = os.getenv("PUBLIC_HOST", "http://127.0.0.1:8545")
-TIMEOUT = int(os.environ.setdefault("TIMEOUT", "60"))
 
 
 @dataclasses.dataclass
@@ -26,10 +10,26 @@ class Action:
     handler: typing.Callable[[], typing.Awaitable[None]]
 
 
-class ChallengeBase(ABC, Pow):
+class ChallengeBase:
+    """
+    Base class for defining an interactive CTF challenge.
+    Subclasses should define `actions` that the player can trigger when connecting to the remote.
+    They are instantiated for each connection.
+    """
+
     # per-subclass key value database to store challenge instance information
     metadata: dict[str, typing.Any]
+    # unique per-instance
     token: str
+
+    async def put_metadata(self, new_metadata: dict[str, str]):
+        self.metadata[self.token] = new_metadata
+
+    async def get_metadata(self):
+        return self.metadata[self.token]
+
+    async def del_metadata(self):
+        del self.metadata[self.token]
 
     def __init__(self, reader, writer, metadata):
         self._reader = reader
@@ -37,101 +37,35 @@ class ChallengeBase(ABC, Pow):
         self.metadata = metadata
 
     async def print(self, *args, sep=" ", end="\n", flush=False):
+        """Send data to the player, with an interface matching `builtins.print`"""
         buf = io.StringIO()
         print(*args, sep=sep, end=end, file=buf, flush=flush)
         self._writer.write(buf.getvalue().encode())
         await self._writer.drain()
 
     async def input(self, prompt=""):
+        """Prompt data from the player, with an interface matching `builtins.input`"""
         self._writer.write(prompt.encode())
         await self._writer.drain()
         return (await self._reader.readline()).decode().strip()
 
-    def update_metadata(self, new_metadata: dict[str, str]):
-        self.metadata[self.token] = new_metadata
+    def __default_action(self) -> Action:
+        return Action("say hello", self.__say_hello)
 
-    @property
     def actions(self) -> list[Action]:
-        return [
-            Action("deploy", self._deploy_challenge),
-            self.default_action,
-        ]
+        """
+        Return a list of actions to offer the player upon connection.
+        If there's only one action, the prompt is skipped.
+        """
+        return []
 
-    @property
-    def default_action(self) -> Action:
-        return Action("say hello", self._say_hello)
-
-    @property
-    def web3(self):
-        return Web3(
-            Web3.IPCProvider(os.path.join("/tmp/anvils", self.token))
-        )
-
-    async def _say_hello(self) -> None:
+    async def __say_hello(self) -> None:
         await self.print("hello web3")
 
-    async def request_token(self):
-        token = await self.input("token? ")
-        if not token.isalnum():
-            await self.print("bad token")
-            raise Exception("bad token")
-        if token not in self.metadata:
-            await self.print("instance not found")
-            raise Exception("instance not found")
-        self.token = token
-
-    async def _deploy_challenge(self):
-        await self.require_pow()
-
-        await self.print("deploying challenge...")
-
-        self.mnemonic = generate_mnemonic(12, lang="english")
-        self.token = secrets.token_hex()
-        os.makedirs("/tmp/anvils", exist_ok=True)
-        ipc_path = os.path.join("/tmp/anvils", self.token)
-
-        # run anvil in the background
-        anvil = await asyncio.create_subprocess_exec("anvil", "--port", "0", "--ipc", ipc_path, "-m", self.mnemonic)
-
-        try:
-            async with asyncio.timeout(TIMEOUT):
-                while not os.access(ipc_path, os.R_OK):
-                    await asyncio.sleep(1)
-
-                challenge_addr = await self.deploy()
-
-                self.update_metadata(
-                    {"mnemonic": self.mnemonic, "challenge_address": challenge_addr}
-                )
-
-                await self.print()
-                await self.print(f"your challenge has been deployed")
-                await self.print(f"it will be stopped in {TIMEOUT} seconds")
-                await self.print(f"---")
-                await self.print(f"token:              {self.token}")
-                await self.print(f"rpc endpoint:       {PUBLIC_HOST}/{self.token}")
-                await self.print(
-                    f"private key:        {get_player_account(self.mnemonic).key.hex()}"
-                )
-                await self.print(f"challenge contract: {challenge_addr}")
-                await asyncio.sleep(TIMEOUT)
-        finally:
-            anvil.terminate()
-            await anvil.wait()
-
-    async def deploy(self) -> str:
-        return await asyncio.to_thread(
-            deploy,
-            self.web3,
-            self.token,
-            "contracts/",
-            self.mnemonic,
-        )
-
-    async def prompt_action(self) -> Action:
-        actions = self.actions
+    async def __prompt_action(self) -> Action:
+        actions = self.actions()
         if len(actions) == 0:
-            return Action("say hello", self._say_hello)
+            return self.__default_action()
         elif len(actions) == 1:
             return actions[0]
         for i, a in enumerate(actions):
@@ -145,6 +79,9 @@ class ChallengeBase(ABC, Pow):
                 return actions[choice - 1]
 
     async def handle(self) -> None:
+        """
+        Handle a connection from a player.
+        """
         with contextlib.closing(self._writer):
-            action = await self.prompt_action()
+            action = await self.__prompt_action()
             await action.handler()

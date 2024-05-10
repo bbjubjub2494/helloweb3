@@ -1,10 +1,10 @@
 import asyncio
 import socketserver
 
-from lib.base import ChallengeBase
+from lib.anvil import ChallengeWithAnvil
 
 
-class Challenge(ChallengeBase):
+class Challenge(ChallengeWithAnvil):
     pass
 
 
