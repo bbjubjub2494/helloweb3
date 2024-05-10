@@ -4,7 +4,7 @@ import os
 import secrets
 
 from eth_account.hdaccount import generate_mnemonic
-from web3 import Web3
+from web3 import AsyncWeb3, Web3
 
 from .internal.util import deploy, get_player_account
 from .actions import Action
@@ -30,6 +30,10 @@ class ChallengeWithAnvil(ChallengeBase):
     @property
     def web3(self):
         return Web3(Web3.IPCProvider(os.path.join("/tmp/anvils", self.token)))
+
+    @property
+    def async_web3(self):
+        return AsyncWeb3(Web3.AsyncHTTPProvider(f"http://127.0.0.1:8545/{self.token}"))
 
     @classmethod
     async def _deploy(cls, conn):

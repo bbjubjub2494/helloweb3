@@ -1,4 +1,3 @@
-import asyncio
 import os
 
 from eth_abi import abi
@@ -34,15 +33,15 @@ class PwnChallengeWithAnvil(ChallengeWithAnvil):
         return token
 
     async def get_flag(self, conn):
-        if await asyncio.to_thread(self.is_solved_sync):
+        if await self.is_solved():
             await conn.print(FLAG)
         else:
             await conn.print("are you sure you solved it?")
 
-    def is_solved_sync(self) -> bool:
+    async def is_solved(self) -> bool:
         (result,) = abi.decode(
             ["bool"],
-            self.web3.eth.call(
+            await self.async_web3.eth.call(
                 {
                     "to": self.challenge_addr,
                     "data": self.web3.keccak(text="isSolved()")[:4],
