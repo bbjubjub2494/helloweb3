@@ -7,29 +7,52 @@ import posixpath
 import re
 
 
+class ForbiddenMethod(Exception):
+    pass
+
+
 class HTTPRequestHandler(BaseHTTPRequestHandler):
     # allow standard methods and otterscan
     # in particular, don't allow cheatcodes
-    _ALLOW = re.compile(r'^(eth|ots)_')
+    _ALLOW = re.compile(r'^(eth|erigon|ots)_')
+
+    def do_OPTIONS(self):
+        self.send_response(200)
+        self.send_header("Access-Control-Request-Method", "POST")
+        self.send_header("Access-Control-Allow-Origin", "*")
+        self.send_header("Access-Control-Allow-Headers", "Content-Type")
+        self.end_headers()
 
     def do_POST(self):
         length = int(self.headers.get("Content-Length"))
         message = json.loads(self.rfile.read(length))
-        method, params = message["method"], message.get("params")
+        try:
+            if isinstance(message, list):
+                response = [self._handle_rpc(message) for message in message]
+            else:
+                response = self._handle_rpc(message)
+        except ForbiddenMethod as e:
+            self.send_error(http.HTTPStatus.FORBIDDEN, e.args[0])
+            return
+
+        self.send_response(200)
+        self.send_header("Content-type", "application/json")
+        self.send_header("Access-Control-Allow-Origin", "*")
+        self.end_headers()
+        self.wfile.write(json.dumps(response).encode())
+
+    def _handle_rpc(self, message):
+        method, params, id = message["method"], message.get("params"), message.get("id")
         token = posixpath.normpath(self.path).lstrip("/")
         ipc_path = os.path.join("/tmp/anvils", token)
 
         if not self._ALLOW.search(method):
-            self.send_error(http.HTTPStatus.NOT_ALLOWED, "forbidden RPC method")
-            return
+            raise ForbiddenMethod(f"forbidden RPC method: {method}")
 
         provider = web3.IPCProvider(ipc_path)
-        response = json.dumps(provider.make_request(method, params))
-
-        self.send_response(200)
-        self.send_header("Content-type", "application/json")
-        self.end_headers()
-        self.wfile.write(response.encode())
+        response = provider.make_request(method, params)
+        response['id'] = id
+        return response
 
 
 ThreadingHTTPServer(("", 8545), HTTPRequestHandler).serve_forever()
