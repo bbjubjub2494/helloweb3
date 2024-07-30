@@ -1,9 +1,8 @@
 import asyncio
-import socketserver
 
-from lib.pow import ChallengeWithAnvilAndPow
-from lib.pwn import PwnChallengeWithAnvil
-from lib.connection import Connection
+from helloweb3.pow import ChallengeWithAnvilAndPow
+from helloweb3.pwn import PwnChallengeWithAnvil
+from helloweb3.connection import Connection
 
 
 class Challenge(PwnChallengeWithAnvil, ChallengeWithAnvilAndPow):

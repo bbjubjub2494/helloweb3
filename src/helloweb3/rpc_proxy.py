@@ -55,4 +55,5 @@ class HTTPRequestHandler(BaseHTTPRequestHandler):
         return response
 
 
-ThreadingHTTPServer(("", 8545), HTTPRequestHandler).serve_forever()
+if __name__ == '__main__':
+    ThreadingHTTPServer(("", 8545), HTTPRequestHandler).serve_forever()

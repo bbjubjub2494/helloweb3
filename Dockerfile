@@ -12,6 +12,7 @@ RUN curl -L https://foundry.paradigm.xyz | bash && \
 COPY requirements.txt /tmp/requirements.txt
 RUN pip install -r /tmp/requirements.txt
 
-WORKDIR /home/ctf
+COPY . /home/ctf/challenge
 
-COPY . challenge
+WORKDIR /home/ctf/challenge
+RUN pip install -e .

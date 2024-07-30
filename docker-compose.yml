@@ -3,7 +3,7 @@ services:
     build:
       context: .
     working_dir: /home/ctf/challenge
-    command: sh -c "python3 proxy.py & python3 challenge.py"
+    command: sh -c "python3 -m helloweb3.rpc_proxy & python3 challenge.py"
     expose:
       - 1337
       - 8545
