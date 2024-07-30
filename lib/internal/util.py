@@ -18,13 +18,12 @@ def deploy(
     project_location: str,
     mnemonic: str,
     deploy_script: str = "script/Deploy.s.sol:Deploy",
-    env: dict = {},
 ) -> str:
     rfd, wfd = os.pipe2(os.O_NONBLOCK)
 
     proc = subprocess.Popen(
         args=[
-            "/opt/foundry/bin/forge",
+            "forge",
             "script",
             "--rpc-url",
             f"http://127.0.0.1:8545/{token}",
@@ -35,24 +34,19 @@ def deploy(
             deploy_script,
         ],
         env={
-            "PATH": "/opt/foundry/bin:/usr/bin:" + os.getenv("PATH", "/fake"),
             "MNEMONIC": mnemonic,
             "OUTPUT_FILE": f"/proc/self/fd/{wfd}",
         }
-        | env,
+        | os.environ,
         pass_fds=[wfd],
         cwd=project_location,
         text=True,
         encoding="utf8",
         stdin=subprocess.DEVNULL,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
     )
     stdout, stderr = proc.communicate()
 
     if proc.returncode != 0:
-        print(stdout)
-        print(stderr)
         raise Exception("forge failed to run")
 
     result = os.read(rfd, 256).decode("utf8")
