@@ -7,6 +7,9 @@ from .connection import Connection
 
 @dataclasses.dataclass
 class Action:
+    """
+    An action can be triggered remotely by the CTF player.
+    """
     description: str
     handler: typing.Callable[[Connection], typing.Awaitable[None]]
 

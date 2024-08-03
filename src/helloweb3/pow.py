@@ -28,6 +28,9 @@ class NcPowser:
 
 
 class ChallengeWithAnvilAndPow(ChallengeWithAnvil):
+    """
+    A challenge which will impose a proof-of-work puzzle on each deployment.
+    """
     async def _require_pow(self, conn):
         powser = NcPowser(POW_DIFFICULTY)
         prefix = powser.get_challenge()

@@ -7,6 +7,11 @@ import posixpath
 import re
 
 
+"""
+Listen for HTTP RPC requests on port 8545 and pass them on to running ChallengeWithAnvil instances.
+"""
+
+
 class ForbiddenMethod(Exception):
     pass
 

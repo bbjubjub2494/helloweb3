@@ -2,6 +2,9 @@ import io
 
 
 class Connection:
+    """
+    A connection opened by a CTF player.
+    """
     def __init__(self, reader, writer):
         self._reader = reader
         self._writer = writer

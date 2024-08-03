@@ -9,6 +9,11 @@ FLAG = os.getenv("FLAG", "EPFL{flag}")
 
 
 class PwnChallengeWithAnvil(ChallengeWithAnvil):
+    """
+    A colloquial "pwn" challenge, where the flag will be released if the smart contract itself reports that it has been solved.
+
+    By default, a `isSolved()` function returning non-zero upon solving is used.
+    """
     @classmethod
     def actions(cls):
         actions = super().actions()
@@ -33,6 +38,9 @@ class PwnChallengeWithAnvil(ChallengeWithAnvil):
         return token
 
     async def get_flag(self, conn):
+        """
+        Handler for the "get flag" action.
+        """
         if await self.is_solved():
             await conn.print(FLAG)
         else:

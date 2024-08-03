@@ -16,6 +16,17 @@ TIMEOUT = int(os.environ.setdefault("TIMEOUT", "60"))
 
 
 class ChallengeWithAnvil(ChallengeBase):
+    """
+    A challenge that must be solved on a fresh Anvil instance.
+    Each instance is identified by a server-generated random token.
+
+    Note that this module is tightly-coupled with the template.
+
+    This requires an RPC proxy like the rpc_proxy module to sit between the player and the Anvil instance.
+
+    The $PUBLIC_HOST environment variable will be given to the user as the base address of the proxy.
+    After $TIMEOUT seconds, the instance will be destroyed.
+    """
     instances = {}
     token: str
 
