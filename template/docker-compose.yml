@@ -1,0 +1,18 @@
+services:
+  challenge:
+    build:
+      context: .
+      dockerfile: challenge.dockerfile
+    working_dir: /home/ctf/challenge
+    command: sh -c "python3 -m helloweb3.rpc_proxy & python3 challenge.py"
+    expose:
+      - 1337
+      - 8545
+    ports:
+      - "1337:1337"
+      - "8545:8545"
+    environment:
+      FLAG: "ctf{flag}"
+      TIMEOUT: 60 # seconds
+      POW_DIFFICULTY: 22 # bits
+      PUBLIC_HOST: "http://127.0.0.1:8545"
