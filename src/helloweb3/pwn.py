@@ -5,7 +5,7 @@ from eth_abi import abi
 from .actions import Action
 from .anvil import ChallengeWithAnvil
 
-FLAG = os.getenv("FLAG", "EPFL{flag}")
+FLAG = os.getenv("FLAG", "ctf{fake}")
 
 
 class PwnChallengeWithAnvil(ChallengeWithAnvil):

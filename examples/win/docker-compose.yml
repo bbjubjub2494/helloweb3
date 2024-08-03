@@ -11,3 +11,5 @@ services:
     ports:
       - "1337:1337"
       - "8545:8545"
+    environment:
+      FLAG: ctf{o_no_access_control}
