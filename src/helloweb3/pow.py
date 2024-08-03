@@ -1,8 +1,11 @@
 import hashlib
+import os
 import secrets
 
 from .anvil import ChallengeWithAnvil
 
+
+POW_DIFFICULTY = int(os.getenv("POW_DIFFICULTY", 0))
 
 # copied from: https://github.com/balsn/proof-of-work
 class NcPowser:
@@ -26,7 +29,7 @@ class NcPowser:
 
 class ChallengeWithAnvilAndPow(ChallengeWithAnvil):
     async def _require_pow(self, conn):
-        powser = NcPowser()
+        powser = NcPowser(POW_DIFFICULTY)
         prefix = powser.get_challenge()
         await conn.print(
             f"please : sha256({prefix} + ???) == {'0'*powser.difficulty}({powser.difficulty})... "
