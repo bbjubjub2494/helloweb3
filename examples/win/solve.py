@@ -1,10 +1,8 @@
 from pwn import *
 
-import os, json, time, string
+import string, subprocess
 
-from eth_account import Account
-
-r = remote("localhost", 1337)
+r = remote(args.get('HOST', "localhost"), args.get('PORT', 1337))
 
 r.recvuntil(b"action? ")
 r.sendline(b"1")
@@ -32,5 +30,22 @@ privk = r.recvline().strip().decode()
 r.recvuntil(b"challenge contract:")
 challenge_addr = r.recvline().strip().decode()
 
-CHALLENGE_ABI = json.load(open("contracts/out/Challenge.sol/Challenge.json"))["abi"]
-print(rpc_url)
+rpc_url = rpc_url.replace("127.0.0.1", args['HOST'])
+subprocess.run([
+    "forge", "script",
+    "-f", rpc_url,
+    "--private-key", privk,
+    "--broadcast",
+    "Solve",
+    "--sig", "run(address challenge)",
+    challenge_addr,
+],
+    cwd="contracts",
+)
+
+r = remote(args.get('HOST', "localhost"), args.get('PORT', 1337))
+r.recvuntil(b"action? ")
+r.sendline(b"2")
+r.recvuntil(b"token? ")
+r.sendline(token)
+r.interactive()
