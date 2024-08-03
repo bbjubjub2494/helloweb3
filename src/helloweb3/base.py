@@ -11,7 +11,3 @@ class ChallengeBase(abc.ABC):
     @abc.abstractmethod
     def actions(cls) -> list[Action]:
         pass
-
-    @classmethod
-    async def handle(cls, conn):
-        await handle_with_actions(conn, cls.actions())
