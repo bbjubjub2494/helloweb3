@@ -1,3 +1,8 @@
+"""
+Listen for HTTP RPC requests on port 8545 and pass them on to running ChallengeWithAnvil instances.
+"""
+
+
 from http.server import *
 import http
 import web3
@@ -5,11 +10,6 @@ import json
 import os.path
 import posixpath
 import re
-
-
-"""
-Listen for HTTP RPC requests on port 8545 and pass them on to running ChallengeWithAnvil instances.
-"""
 
 
 class ForbiddenMethod(Exception):
@@ -47,7 +47,7 @@ class HTTPRequestHandler(BaseHTTPRequestHandler):
         self.wfile.write(json.dumps(response).encode())
 
     def _handle_rpc(self, message):
-        method, params, id = message["method"], message.get("params"), message.get("id")
+        method, params, id_ = message["method"], message.get("params"), message.get("id")
         token = posixpath.normpath(self.path).lstrip("/")
         ipc_path = os.path.join("/tmp/anvils", token)
 
@@ -56,7 +56,7 @@ class HTTPRequestHandler(BaseHTTPRequestHandler):
 
         provider = web3.IPCProvider(ipc_path)
         response = provider.make_request(method, params)
-        response['id'] = id
+        response['id'] = id_
         return response
 
 

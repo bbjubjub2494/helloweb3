@@ -1,7 +1,5 @@
-import io
 import os
 import subprocess
-import socketserver
 
 from eth_account import Account
 Account.enable_unaudited_hdwallet_features()
@@ -44,7 +42,6 @@ def deploy(
         encoding="utf8",
         stdin=subprocess.DEVNULL,
     )
-    stdout, stderr = proc.communicate()
 
     if proc.returncode != 0:
         raise Exception("forge failed to run")

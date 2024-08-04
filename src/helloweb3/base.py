@@ -1,6 +1,6 @@
 import abc
 
-from .actions import Action, handle_with_actions
+from .actions import Action
 
 
 class ChallengeBase(abc.ABC):

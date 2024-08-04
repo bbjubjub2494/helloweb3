@@ -25,3 +25,6 @@ Issues = "https://github.com/bbjubjub2494/helloweb3/issues"
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"
+
+[tool.pylint."messages control"]
+disable = ["R", "C"]

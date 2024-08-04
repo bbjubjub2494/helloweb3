@@ -1,4 +1,3 @@
-import contextlib
 import dataclasses
 import typing
 
@@ -16,7 +15,7 @@ class Action:
 
 async def prompt_action(conn: Connection, actions: list[Action]) -> Action:
     if len(actions) == 0:
-        return Action("say hello", conn.__say_hello)
+        return Action("say hello", lambda: conn.print("Hello!"))
     elif len(actions) == 1:
         return actions[0]
     for i, a in enumerate(actions):

@@ -5,7 +5,7 @@ import secrets
 from .anvil import ChallengeWithAnvil
 
 
-POW_DIFFICULTY = int(os.getenv("POW_DIFFICULTY", 0))
+POW_DIFFICULTY = int(os.getenv("POW_DIFFICULTY", "0"))
 
 # copied from: https://github.com/balsn/proof-of-work
 class NcPowser:

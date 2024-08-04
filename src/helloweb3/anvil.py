@@ -31,6 +31,8 @@ class ChallengeWithAnvil(ChallengeBase):
     token: str
 
     def __init__(self, token: str):
+        self.challenge_addr = None
+        self.mnemonic = generate_mnemonic(12, lang="english")
         self.token = token
 
     @classmethod
@@ -59,7 +61,6 @@ class ChallengeWithAnvil(ChallengeBase):
     async def deploy(self, conn):
         await conn.print("deploying challenge...")
 
-        self.mnemonic = generate_mnemonic(12, lang="english")
         os.makedirs("/tmp/anvils", exist_ok=True)
         ipc_path = os.path.join("/tmp/anvils", self.token)
 
@@ -79,9 +80,9 @@ class ChallengeWithAnvil(ChallengeBase):
             )
 
             await conn.print()
-            await conn.print(f"your challenge has been deployed")
+            await conn.print("your challenge has been deployed")
             await conn.print(f"it will be stopped in {TIMEOUT} seconds")
-            await conn.print(f"---")
+            await conn.print("---")
             await conn.print(f"token:              {self.token}")
             await conn.print(f"rpc endpoint:       {PUBLIC_HOST}/{self.token}")
             await conn.print(
