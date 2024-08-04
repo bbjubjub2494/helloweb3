@@ -6,7 +6,7 @@ authors = [
 ]
 description = "capture-the-flag framework for web 3"
 readme = "README.md"
-requires-python = ">=3.8"
+requires-python = ">=3.11"
 classifiers = [
     "Programming Language :: Python :: 3",
     "License :: OSI Approved :: MIT License",
