@@ -4,6 +4,14 @@ import subprocess
 from eth_account import Account
 Account.enable_unaudited_hdwallet_features()
 
+
+class PlayerError(Exception):
+    """
+    Raised when a player provides invalid input.
+    It should result in terminating the connection.
+    """
+
+
 def _get_account(mnemonic, n):
     # pylint: disable=no-value-for-parameter
     return Account.from_mnemonic(mnemonic,account_path=f"m/44'/60'/0'/0/{n}")
@@ -20,7 +28,7 @@ def deploy(
 ) -> str:
     rfd, wfd = os.pipe2(os.O_NONBLOCK)
 
-    proc = subprocess.Popen(
+    proc = subprocess.run(
         args=[
             "forge",
             "script",
@@ -39,13 +47,11 @@ def deploy(
         | os.environ,
         pass_fds=[wfd],
         cwd=project_location,
-        text=True,
-        encoding="utf8",
-        stdin=subprocess.DEVNULL,
+        check=True,
     )
 
     if proc.returncode != 0:
-        raise Exception("forge failed to run")
+        raise PlayerError("forge failed to run")
 
     result = os.read(rfd, 256).decode("utf8")
 

@@ -4,6 +4,7 @@ from eth_abi import abi
 
 from .actions import Action
 from .anvil import ChallengeWithAnvil
+from .internal.util import PlayerError
 
 FLAG = os.getenv("FLAG", "ctf{fake}")
 
@@ -30,11 +31,9 @@ class PwnChallengeWithAnvil(ChallengeWithAnvil):
     async def _request_token(cls, conn):
         token = await conn.input("token? ")
         if not token.isalnum():
-            await conn.print("bad token")
-            raise Exception("bad token")
+            raise PlayerError("bad token")
         if token not in cls.instances:
-            await conn.print("instance not found")
-            raise Exception("instance not found")
+            raise PlayerError("instance not found")
         return token
 
     async def get_flag(self, conn):

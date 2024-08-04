@@ -5,6 +5,7 @@
 
 from .base import ChallengeBase
 from .anvil import ChallengeWithAnvil
+from .internal.util import PlayerError
 from .pwn import PwnChallengeWithAnvil
 from .pow import ChallengeWithAnvilAndPow
 
@@ -19,7 +20,12 @@ async def serve_challenge(cls: type[ChallengeBase], host="0.0.0.0", port=1337):
 
     async def client_connected_cb(reader, writer):
         with Connection(reader, writer) as conn:
-            await handle_with_actions(conn, cls.actions())
+            try:
+                await handle_with_actions(conn, cls.actions())
+            except PlayerError as e:
+                await conn.print(e)
+            except asyncio.TimeoutError:
+                pass # silence
     server = await asyncio.start_server(client_connected_cb, host, port)
 
     await server.serve_forever()

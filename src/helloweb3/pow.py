@@ -3,6 +3,7 @@ import os
 import secrets
 
 from .anvil import ChallengeWithAnvil
+from .internal.util import PlayerError
 
 
 POW_DIFFICULTY = int(os.getenv("POW_DIFFICULTY", "0"))
@@ -41,8 +42,7 @@ class ChallengeWithAnvilAndPow(ChallengeWithAnvil):
         await conn.print(f"difficulty: {powser.difficulty}")
         answer = await conn.input(" >")
         if not powser.verify_hash(prefix, answer):
-            await conn.print("no etherbase for you")
-            raise Exception("invalid pow")
+            raise PlayerError("invalid pow")
 
     async def deploy(self, conn):
         await self._require_pow(conn)
