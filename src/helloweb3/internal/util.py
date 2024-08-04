@@ -5,6 +5,7 @@ from eth_account import Account
 Account.enable_unaudited_hdwallet_features()
 
 def _get_account(mnemonic, n):
+    # pylint: disable=no-value-for-parameter
     return Account.from_mnemonic(mnemonic,account_path=f"m/44'/60'/0'/0/{n}")
 
 def get_player_account(mnemonic):
