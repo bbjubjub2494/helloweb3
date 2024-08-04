@@ -2,6 +2,7 @@ import asyncio
 import contextlib
 import os
 import secrets
+from typing import ClassVar
 
 from eth_account.hdaccount import generate_mnemonic
 from web3 import AsyncWeb3, Web3
@@ -14,6 +15,7 @@ from .base import ChallengeBase
 PUBLIC_HOST = os.getenv("PUBLIC_HOST", "http://127.0.0.1:8545")
 TIMEOUT = int(os.environ.setdefault("TIMEOUT", "60"))
 
+Token = str
 
 class ChallengeWithAnvil(ChallengeBase):
     """
@@ -27,10 +29,10 @@ class ChallengeWithAnvil(ChallengeBase):
     The $PUBLIC_HOST environment variable will be given to the user as the base address of the proxy.
     After $TIMEOUT seconds, the instance will be destroyed.
     """
-    instances = {}
-    token: str
+    instances: ClassVar[dict[Token, ChallengeWithAnvil]] = {}
+    token: Token
 
-    def __init__(self, token: str):
+    def __init__(self, token: Token):
         self.challenge_addr = None
         self.mnemonic = generate_mnemonic(12, lang="english")
         self.token = token
