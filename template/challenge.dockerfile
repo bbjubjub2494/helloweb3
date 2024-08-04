@@ -9,7 +9,7 @@ ENV PATH=${FOUNDRY_DIR}/bin/:${PATH}
 RUN curl -L https://foundry.paradigm.xyz | bash && \
     foundryup
 
-RUN pip install git+https://github.com/bbjubjub2494/helloweb3
+RUN pip install helloweb3
 
 COPY . /home/ctf/challenge
 
