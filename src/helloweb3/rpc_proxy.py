@@ -3,7 +3,7 @@ Listen for HTTP RPC requests on port 8545 and pass them on to running ChallengeW
 """
 
 
-from http.server import *
+from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 import http
 import web3
 import json
