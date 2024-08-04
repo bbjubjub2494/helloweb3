@@ -10,4 +10,4 @@ class ChallengeBase(abc.ABC):
     @classmethod
     @abc.abstractmethod
     def actions(cls) -> list[Action]:
-        pass
+        return []
