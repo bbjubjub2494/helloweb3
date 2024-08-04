@@ -27,7 +27,7 @@ jobs:
     - name: Install dependencies
       run: |
         pip install --upgrade pip
-        pip install flake8 pylint
+        pip install flake8 mypy pylint
         pip install -e .
     - name: Lint with flake8
       run: |
@@ -38,3 +38,6 @@ jobs:
     - name: Lint with pylint
       run: |
         pylint src/
+    - name: Check types with mypy
+      run: |
+        mypy src/
