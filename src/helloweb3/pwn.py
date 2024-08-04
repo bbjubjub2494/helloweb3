@@ -1,6 +1,6 @@
 import os
 
-from eth_abi import abi
+from eth_abi import abi # type: ignore
 
 from .actions import Action
 from .anvil import ChallengeWithAnvil
