@@ -15,7 +15,7 @@ class Action:
 
 async def prompt_action(conn: Connection, actions: list[Action]) -> Action:
     if len(actions) == 0:
-        return Action("say hello", lambda: conn.print("Hello!"))
+        return Action("say hello", lambda conn: conn.print("Hello!"))
     elif len(actions) == 1:
         return actions[0]
     for i, a in enumerate(actions):
