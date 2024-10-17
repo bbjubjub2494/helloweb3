@@ -7,9 +7,11 @@ import {Challenge} from "src/Challenge.sol";
 
 contract Solve is Script {
     function run(Challenge challenge) public {
-        vm.broadcast();
+        vm.startBroadcast();
 
         // Your solve here
+
+        vm.stopBroadcast();
 
         assert(challenge.isSolved());
     }
