@@ -13,3 +13,6 @@ services:
       - "8545:8545"
     environment:
       FLAG: ctf{o_no_access_control}
+      TIMEOUT: 60 # seconds
+      POW_DIFFICULTY: 22 # bits
+      PUBLIC_HOST: "http://127.0.0.1:8545"

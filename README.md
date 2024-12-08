@@ -6,7 +6,7 @@ and the architecture is modular.
 Out of the box, a mixin for Solidity challenges running on an isolated [Anvil] instance,
 as well as support for a simple PoW rate-limiting scheme are provided.
 
-See the examples or template to get started.
+See the templates to get started.
 
 ## Tricks
 You can use this command to launch a web-based blockchain explorer on your challenge:
