@@ -3,7 +3,6 @@ services:
     build:
       context: .
       dockerfile: challenge.dockerfile
-    working_dir: /home/ctf/challenge
     command: sh -c "python3 -m helloweb3.rpc_proxy & python3 challenge.py"
     expose:
       - 1337
@@ -15,4 +14,10 @@ services:
       FLAG: ctf{o_no_access_control}
       TIMEOUT: 60 # seconds
       POW_DIFFICULTY: 22 # bits
-      PUBLIC_HOST: "http://127.0.0.1:8545"
+      PUBLIC_HOST: "http://challenge:8545"
+
+  solve:
+    build:
+      context: .
+      dockerfile: solve.dockerfile
+    command: sh -c "sleep 5; python3 solve.py HOST=challenge"

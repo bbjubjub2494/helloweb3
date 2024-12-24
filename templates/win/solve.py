@@ -30,7 +30,6 @@ privk = r.recvline().strip().decode()
 r.recvuntil(b"challenge contract:")
 challenge_addr = r.recvline().strip().decode()
 
-rpc_url = rpc_url.replace("127.0.0.1", args['HOST'])
 subprocess.run([
     "forge", "script",
     "-f", rpc_url,
