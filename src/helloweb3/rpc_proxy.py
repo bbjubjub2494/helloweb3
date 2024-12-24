@@ -19,7 +19,7 @@ class ForbiddenMethod(Exception):
 class HTTPRequestHandler(BaseHTTPRequestHandler):
     # allow standard methods and otterscan
     # in particular, don't allow cheatcodes
-    _ALLOW = re.compile(r'^(eth|erigon|ots)_')
+    _ALLOW = re.compile(r'^(web3|eth|net|erigon|ots)_')
 
     def do_OPTIONS(self):
         self.send_response(200)
