@@ -20,6 +20,15 @@ class HTTPRequestHandler(BaseHTTPRequestHandler):
     # allow standard methods and otterscan
     # in particular, don't allow cheatcodes
     _ALLOW = re.compile(r'^(web3|eth|net|erigon|ots)_')
+    _DENY = {
+        "eth_sign",
+        "eth_signTransaction",
+        "eth_signTypedData",
+        "eth_signTypedData_v3",
+        "eth_signTypedData_v4",
+        "eth_sendTransaction",
+        "eth_sendUnsignedTransaction",
+    }
 
     def do_OPTIONS(self):
         self.send_response(200)
@@ -51,7 +60,7 @@ class HTTPRequestHandler(BaseHTTPRequestHandler):
         token = posixpath.normpath(self.path).lstrip("/")
         ipc_path = os.path.join("/tmp/anvils", token)
 
-        if not self._ALLOW.search(method):
+        if not self._ALLOW.search(method) or method in self._DENY:
             raise ForbiddenMethod(f"forbidden RPC method: {method}")
 
         provider = web3.IPCProvider(ipc_path)
