@@ -1,4 +1,4 @@
-FROM python:3.11-slim as challenge
+FROM python:3.11-slim AS challenge
 
 RUN apt-get update && \
     apt-get install -y curl git && \
@@ -9,7 +9,8 @@ ENV PATH=${FOUNDRY_DIR}/bin/:${PATH}
 RUN curl -L https://foundry.paradigm.xyz | bash && \
     foundryup
 
-RUN pip install helloweb3
+ARG HELLOWEB3_URL
+RUN pip install ${HELLOWEB3_URL:-helloweb3}
 
 COPY . /home/ctf/challenge
 

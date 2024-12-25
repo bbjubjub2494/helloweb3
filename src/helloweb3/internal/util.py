@@ -35,9 +35,8 @@ def deploy(
             "--rpc-url",
             f"http://127.0.0.1:8545/{token}",
             "--broadcast",
-            "--unlocked",
-            "--sender",
-            web3.eth.accounts[0],
+            "--mnemonics",
+            mnemonic,
             deploy_script,
         ],
         env={
