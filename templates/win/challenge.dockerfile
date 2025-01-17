@@ -1,7 +1,7 @@
 FROM python:3.11-slim AS challenge
 
 RUN apt-get update && \
-    apt-get install -y curl git && \
+    apt-get install -y curl git build-essential && \
     rm -rf /var/lib/apt/lists/*
 
 ENV FOUNDRY_DIR=/opt/foundry
