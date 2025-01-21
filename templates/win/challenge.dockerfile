@@ -16,3 +16,5 @@ RUN pip install $HELLOWEB3
 COPY . /home/ctf/challenge
 
 WORKDIR /home/ctf/challenge
+
+RUN cd contracts/; forge soldeer update

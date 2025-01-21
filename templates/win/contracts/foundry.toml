@@ -2,8 +2,9 @@
 src = "src"
 out = "out"
 fs_permissions = [{ access = 'read-write', path = '/'}]
+libs = ["dependencies"]
 
 # See more config options https://github.com/foundry-rs/foundry/blob/master/crates/config/README.md#all-options
 
 [dependencies]
-forge-std = "1.9.1"
+forge-std = "1.9.5"
