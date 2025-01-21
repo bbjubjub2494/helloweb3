@@ -33,7 +33,7 @@ def deploy(
             "forge",
             "script",
             "--rpc-url",
-            f"http://127.0.0.1:8545/{token}",
+            os.path.join("/tmp/anvils", token),
             "--broadcast",
             "--unlocked",
             "--sender",
