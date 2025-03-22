@@ -8,6 +8,14 @@ as well as support for a simple PoW rate-limiting scheme are provided.
 
 See the templates to get started.
 
+## Caveats
+
+The PyPI package `helloweb3` is under my (`bbjubjub2494`) unilateral control.
+I can push new versions and delete old version at will.
+However, I do not intend to abuse this capability.
+If that is a concern nonetheless, please consider targeting a software source you control, such a a git repository.
+Note that pip supports `git+https` URLs.
+
 ## Tricks
 You can use this command to launch a web-based blockchain explorer on your challenge:
 ```sh
@@ -19,3 +27,14 @@ The template also includes glue code to solve using a [Forge] script.
 
 [Anvil]: https://book.getfoundry.sh/anvil/
 [Forge]: https://book.getfoundry.sh/forge/
+
+## Testing
+
+I was not able to set up a nice testing framework due to the nature of the code.
+The current practice is to pin the commit under test HELLOWEB3 in `examples/win/docker-compose.yaml` after pushing it.
+
+## Credit
+
+Helloweb3 is based on [`paradigmctf.py`] by samcszun, which has often been copy-pasted in other CTFs as well.
+
+[paradigmctf.py]: https://github.com/paradigmxyz/paradigm-ctf-infrastructure/tree/main/paradigmctf.py
