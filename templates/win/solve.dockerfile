@@ -9,10 +9,12 @@ ENV PATH=${FOUNDRY_DIR}/bin/:${PATH}
 RUN curl -L https://foundry.paradigm.xyz | bash && \
     foundryup
 
-WORKDIR /home/ctf/solve
-
 RUN pip install pwntools
 
 COPY . /home/ctf/solve
+
+WORKDIR /home/ctf/solve
+
+RUN cd contracts/; forge soldeer update
 
 CMD python3 solve.py
