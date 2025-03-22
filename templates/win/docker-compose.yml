@@ -3,6 +3,8 @@ services:
     build:
       context: .
       dockerfile: challenge.dockerfile
+      args:
+        HELLOWEB3: git+https://github.com/bbjubjub2494/helloweb3
     command: sh -c "python3 -m helloweb3.rpc_proxy & python3 challenge.py"
     expose:
       - 1337
