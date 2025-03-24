@@ -10,6 +10,12 @@ See the templates to get started.
 
 ## Caveats
 
+Foundry now ships two ways to fetch dependencies: git submodules and [Soldeer].
+Usually, challenge files distributed to players do not come in the form of a git repository.
+Thus, Helloweb3 supports Soldeer and we highly recommend using it for challenges.
+
+[Soldeer]: https://book.getfoundry.sh/projects/soldeer
+
 The PyPI package `helloweb3` is under my (`bbjubjub2494`) unilateral control.
 I can push new versions and delete old version at will.
 However, I do not intend to abuse this capability.
