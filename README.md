@@ -18,7 +18,7 @@ Thus, Helloweb3 supports Soldeer and we highly recommend using it for challenges
 
 The PyPI package `helloweb3` is under my (`bbjubjub2494`) unilateral control.
 I can push new versions and delete old version at will.
-However, I do not intend to abuse this capability.
+Of course, I do not intend to abuse this capability.
 If that is a concern nonetheless, please consider targeting a software source you control, such a a git repository.
 Note that pip supports `git+https` URLs.
 
@@ -41,6 +41,6 @@ The current practice is to pin the commit under test HELLOWEB3 in `examples/win/
 
 ## Credit
 
-Helloweb3 is based on [`paradigmctf.py`] by samcszun, which has often been copy-pasted in other CTFs as well.
+Helloweb3 is based on [`paradigmctf.py`] by samczsun, which has often been copy-pasted in other CTFs as well.
 
 [paradigmctf.py]: https://github.com/paradigmxyz/paradigm-ctf-infrastructure/tree/main/paradigmctf.py
