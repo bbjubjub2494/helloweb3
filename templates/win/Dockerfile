@@ -11,9 +11,9 @@ RUN curl -L https://foundry.paradigm.xyz | bash && \
 
 FROM base AS challenge
 
-ARG HELLOWEB3=helloweb3
+ARG HELLOWEB3_URL=helloweb3
 
-RUN pip install $HELLOWEB3
+RUN pip install $HELLOWEB3_URL
 
 COPY . /home/ctf/challenge
 
