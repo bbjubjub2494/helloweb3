@@ -37,7 +37,7 @@ The template also includes glue code to solve using a [Forge] script.
 ## Testing
 
 I was not able to set up a nice testing framework due to the nature of the code.
-The current practice is to pin the commit under test HELLOWEB3 in `templates/win/docker-compose.yaml` after pushing it.
+The current practice is to pin the commit under test HELLOWEB3_URL in `templates/win/docker-compose.yaml` after pushing it.
 
 ## Credit
 
